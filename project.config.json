@@ -1,0 +1,13 @@
+{
+  "description": "this is a wechat  mini app demo based on wepy",
+  "setting": {
+    "urlCheck": true,
+    "es6": false,
+    "postcss": false,
+    "minified": false
+  },
+  "compileType": "miniprogram",
+  "appid": "THIS_IS_A_APP_ID",
+  "projectname": "wx-app-demo",
+  "miniprogramRoot": "./dist"
+}
