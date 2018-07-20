@@ -22,7 +22,10 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/index'
+      // 'pages/index',
+      'pages/home',
+      'pages/calculator',
+      'pages/canvas'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -58,17 +61,20 @@ export default class extends wepy.app {
     console.log(data)
   }
 
-  getUserInfo(cb) {
+  async getUserInfo(cb) {
     const that = this
     if (this.globalData.userInfo) {
       return this.globalData.userInfo
     }
-    wepy.getUserInfo({
-      success (res) {
-        that.globalData.userInfo = res.userInfo
-        cb && cb(res.userInfo)
-      }
+    return new Promise((resolve, reject) => {
+      wepy.getUserInfo({
+        success (res) {
+          that.globalData.userInfo = res.userInfo
+          resolve(res.userInfo)
+        }
+      })
     })
+    
   }
 }
 </script>

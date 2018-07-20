@@ -1,0 +1,160 @@
+<style lang="less">
+.container {
+    width: 100%;
+    height: 100%;
+}
+
+.canvas{
+  width: 100%;
+  height: 680rpx;
+}
+
+</style>
+
+<template lang="pug">
+view.container
+    canvas.canvas(
+        canvas-id="canvas" 
+        disable-scroll="true" 
+        bindtouchstart="canvasStart" 
+        bindtouchmove="canvasMove" 
+        bindtouchend="canvasEnd" 
+        touchcancel="canvasEnd" 
+        binderror="canvasIdErrorCallback"
+    )
+    button(
+        type="default" bindtap="cleardraw"
+    ) 清除画布
+    //- button(
+    //-     type="default" bindtap="getimg"
+    //- ) 导出图片
+
+</template>
+
+<script>
+import wepy from 'wepy'
+
+
+
+
+
+
+export default class Index extends wepy.page {
+    config = {
+        navigationBarTitleText: "画布"
+    }
+
+    data = {
+        src: "",
+        context: null,
+        canvasw: 0,
+        canvash: 0,
+        isButtonDown: false,
+        arrx: [],
+        arry: [],
+        arrz: []
+    }
+
+    computed = {
+
+    }
+
+    methods = {
+        canvasIdErrorCallback: function (e) {
+            console.error(e.detail.errMsg)
+        },
+        canvasStart: function (event) {
+            this.isButtonDown = true;
+            this.arrz.push(0);
+            this.arrx.push(event.changedTouches[0].x);
+            this.arry.push(event.changedTouches[0].y);
+        },
+        canvasMove: function (event) {
+            if (this.isButtonDown) {
+                this.arrz.push(1);
+                this.arrx.push(event.changedTouches[0].x);
+                this.arry.push(event.changedTouches[0].y);
+            };
+            for (var i = 0; i < this.arrx.length; i++) {
+                if (this.arrz[i] == 0) {
+                    this.context.moveTo(this.arrx[i], this.arry[i])
+                } else {
+                    this.context.lineTo(this.arrx[i], this.arry[i])
+                };
+            };
+            this.context.clearRect(0, 0, this.canvasw, this.canvash);
+            this.context.stroke();
+            this.context.draw(true);
+        },
+        canvasEnd: function (event) {
+            this.isButtonDown = false;
+        },
+        cleardraw: function () {
+            //清除画布
+            this.arrx = [];
+            this.arry = [];
+            this.arrz = [];
+            this.context.clearRect(0, 0, this.canvasw, this.canvash);
+            this.context.draw(true);
+        },
+        getimg: function () {
+            if (this.arrx.length == 0) {
+                wx.showModal({
+                    title: '提示',
+                    content: '签名内容不能为空！',
+                    showCancel: false
+                });
+                return false;
+            };
+            //生成图片
+            wx.canvasToTempFilePath({
+                canvasId: 'canvas',
+                success: function (res) {
+                    console.log(res.tempFilePath);
+                    //存入服务器
+                    wx.uploadFile({
+                        url: 'a.php', //接口地址
+                        filePath: res.tempFilePath,
+                        name: 'file',
+                        formData: { //HTTP 请求中其他额外的 form data 
+                            'user': 'test'
+                        },
+                        success: function (res) {
+                            console.log(res);
+                        },
+                        fail: function (res) {
+                            console.log(res);
+                        },
+                        complete: function (res) {
+                        }
+                    });
+                }
+            })
+        }
+    }
+
+    onLoad() {
+        let me = this
+        this.context = wx.createCanvasContext('canvas');
+        this.context.beginPath()
+        this.context.setStrokeStyle('#ffff00');
+        this.context.setLineWidth(10);
+        this.context.setLineCap('round');
+        this.context.setLineJoin('round');
+        wx.getSystemInfo({
+            success: function (res) {
+                me.canvasw = res.windowWidth
+                me.canvash = res.windowHeight
+            }
+        });
+
+    }
+
+    
+
+}
+
+
+
+
+</script>
