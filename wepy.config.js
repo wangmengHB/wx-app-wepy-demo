@@ -27,9 +27,9 @@ module.exports = {
     pug: {
       pretty: !prod
     },
-    /*sass: {
-      outputStyle: 'compressed'
-    },*/
+    // sass: {
+    //   outputStyle: 'compressed'
+    // },
     babel: {
       sourceMap: true,
       presets: [

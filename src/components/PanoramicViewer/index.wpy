@@ -1,0 +1,209 @@
+<template lang="pug">
+view.panoramic-viewer
+    canvas.source-canvas(
+        canvas-id="sourceCanvas"
+    )
+    canvas.viewport(
+        canvas-id="viewport"
+        bindtouchmove="handleTouchMove"
+        bindtouchstart="handleTouchStart"
+        bindtouchend="handleTouchEnd"
+    )
+</template>
+
+
+<script>
+import wepy from 'wepy'
+import ImageData from './ImageData.js'
+
+const VALID_HORIZONTAL_VIEWPORT = 120
+const VALID_VERTICAL_VIEWPORT = 60
+
+function limitX (x, WIDTH) {
+    if (x < 0 ) {
+        return limitX(x + WIDTH, WIDTH)
+    } else if (x >= WIDTH) {
+        return x % WIDTH
+    } else {
+        return x
+    }
+}
+
+function limitY (y, HEIGHT, VIEW_HEIGHT) {
+    if (y > HEIGHT + VIEW_HEIGHT /3) {
+        return HEIGHT + VIEW_HEIGHT / 3
+    } else if (y < -VIEW_HEIGHT) {
+        return -VIEW_HEIGHT
+    } else {
+        return y
+    }
+}
+
+const VIEW_WIDTH = 284
+const VIEW_HEIGHT = 260
+
+const STEP = 2
+const THRESHOLD_X = 14
+const THRESHOLD_Y = 8
+
+export default class PanoramicViewer extends wepy.component {
+    x = 0
+    y = 0
+    mouseX = 0
+    mouseY = 0
+    IMAGE_WIDTH = 0
+    IMAGE_HEIGHT = 0
+    VIEW_WIDTH = VIEW_WIDTH
+    VIEW_HEIGHT = VIEW_HEIGHT
+    imageData = null
+
+    props = {
+        imageUrl: {}
+    }
+
+    data = {
+        
+    }
+
+    repaint () {
+        let me = this
+        const data = this.imageData.getDataAt(this.x, this.y)
+        wx.canvasPutImageData({
+            canvasId: 'viewport',
+            x: 0,
+            y: 0,
+            width: data.width,
+            height: data.height,
+            data: data.data,
+            success(res) {
+                console.log('paint')
+            }
+        })
+    }
+
+    methods = {
+
+        handleTouchStart (ev) {
+            const {x, y} = ev.changedTouches[0]
+            this.mouseX = x
+            this.mouseY = y 
+        },
+        
+        handleTouchEnd (ev) {
+            
+        },
+
+        handleTouchMove (ev) {
+            const {IMAGE_WIDTH, IMAGE_HEIGHT, VIEW_WIDTH, VIEW_HEIGHT} = this
+            if (IMAGE_WIDTH <= 0 || IMAGE_HEIGHT <= 0) {
+                console.log('image is not loaded.')
+                return;
+            }         
+            let {x, y} = ev.changedTouches[0]
+            let moveX = (x - this.mouseX) * STEP
+            let moveY = (y - this.mouseY) * STEP
+            const originX = this.x, originY = this.y
+                              
+            this.x += moveX
+            this.y += moveY
+            this.x = limitX(this.x, IMAGE_WIDTH)
+            this.y = limitY(this.y, IMAGE_HEIGHT, VIEW_HEIGHT)
+            if (Math.abs(this.x -originX) > THRESHOLD_X || Math.abs(this.y - originY) > THRESHOLD_Y) {
+                this.repaint()
+            }
+            this.mouseX = x
+            this.mouseY = y                    
+        },
+    }
+
+    onLoad() {
+        let me = this
+        console.log(this.imageUrl)
+        wx.getImageInfo({
+            src: this.imageUrl,
+            success: function(res) {
+                const IMAGE_WIDTH = res.width
+                const IMAGE_HEIGHT = res.height
+                me.x = Math.floor((IMAGE_WIDTH - VIEW_WIDTH)/2)
+                me.y = Math.floor((IMAGE_HEIGHT - VIEW_HEIGHT)/2)
+                me.mouseX = me.x
+                me.mouseY = me.y
+                
+                console.log(`IMAGE_WIDTH: ${IMAGE_WIDTH};IMAGE_HEIGHT:${IMAGE_HEIGHT}`)
+                console.log(`VIEW_WIDTH: ${VIEW_WIDTH};VIEW_HEIGHT:${VIEW_HEIGHT}`)      
+                console.log(`x: ${me.x}; y:${me.y}`)
+
+                
+                me.IMAGE_WIDTH = IMAGE_WIDTH,
+                me.IMAGE_HEIGHT = IMAGE_HEIGHT,
+                me.VIEW_WIDTH = VIEW_WIDTH,
+                me.VIEW_HEIGHT = VIEW_HEIGHT
+
+                const ctx = wx.createCanvasContext('sourceCanvas')               
+                ctx.drawImage(res.path, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT)
+                ctx.draw()
+
+                setTimeout(() => {
+                   wx.canvasGetImageData({
+                        canvasId: 'sourceCanvas',
+                        x: 0,
+                        y: 0,
+                        width: IMAGE_WIDTH,
+                        height: IMAGE_HEIGHT,
+                        success(res) {
+                            const data = res
+                            console.log('get origin pixel data')
+                            console.log(data)
+                            
+                            let viewData = {
+                                width: VIEW_WIDTH,
+                                height: VIEW_HEIGHT,
+                                data: new Uint8ClampedArray(VIEW_WIDTH * VIEW_HEIGHT * 4)
+                            }
+
+                            me.imageData = new ImageData(
+                                data, 
+                                IMAGE_WIDTH, 
+                                IMAGE_HEIGHT, 
+                                viewData, 
+                                VIEW_WIDTH,
+                                VIEW_HEIGHT
+                            )
+                            
+                            me.repaint()
+
+
+                        }
+                    }) 
+                }, 300);
+            }
+        })
+    }
+
+    
+}
+
+
+</script>
+
+<style lang="less" scoped>
+.panoramic-viewer {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    .source-canvas {
+        // display: none;
+        position: fixed;
+        left: -10000px;
+        width: 850px;
+        height: 425px;
+    }
+    .viewport {
+        position: fixed;
+        left: 20px;
+        top: 80px;
+        width: 284px;
+        height: 260px;
+    }
+}
+</style>

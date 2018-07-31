@@ -63,6 +63,9 @@ view.container
       }, {
         name: '画布',
         path: 'canvas'
+      }, {
+        name: '全景图',
+        path: 'viewer'
       }]
     }
 

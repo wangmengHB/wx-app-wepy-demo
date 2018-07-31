@@ -1,0 +1,41 @@
+<template lang="pug">
+.container
+    viewer(
+        :imageUrl="imageUrl"
+    )
+</template>
+
+<script>
+import wepy from 'wepy'
+import PanoramicViewer from '../components/PanoramicViewer/index'
+
+const URL = 'https://aispeech-aichat.oss-cn-hangzhou.aliyuncs.com/ecardServer/dev/gallery/null-dc36ad7de42b4f5d9c46df36908dfd9e.jpg?x-oss-process=style/12354_png'
+
+
+export default class Viewer extends wepy.page {
+    config = {
+      navigationBarTitleText: "全景图 demo"
+    }
+
+    components = {
+        viewer: PanoramicViewer
+    }
+
+    data = {
+        imageUrl: URL
+    }
+
+
+}
+
+</script>
+
+<style lang="less" scoped>
+.container {
+    width: 100%;
+    height: 450px;
+    overflow: hidden;
+}
+    
+
+</style>

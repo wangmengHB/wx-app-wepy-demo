@@ -22,10 +22,10 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
-      // 'pages/index',
       'pages/home',
       'pages/calculator',
-      'pages/canvas'
+      'pages/canvas',
+      'pages/viewer'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -45,7 +45,8 @@ export default class extends wepy.app {
   }
 
   onLaunch() {
-    this.testAsync()
+    
+    // this.testAsync()
   }
 
   sleep (s) {
