@@ -41,6 +41,11 @@ view.container
         navigator.zan-cell.zan-cell--access(wx:for="{{list}}" wx:key="name" url="{{ item.path }}")
             view.zan-cell__bd {{(index + 1) + '.  ' +item.name}}
             view.zan-cell__ft
+    view
+      button(
+        open-type="contact"
+      ) 进入会话精灵
+    
 </template>
 
 <script>
@@ -66,6 +71,9 @@ view.container
       }, {
         name: '全景图',
         path: 'viewer'
+      }, {
+        name: 'webview',
+        path: 'webview'
       }]
     }
 

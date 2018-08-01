@@ -1,0 +1,19 @@
+<template lang="pug">
+    web-view(
+        src="https://ba.dui.ai"
+    )
+</template>
+
+
+<script>
+import wepy from 'wepy'
+
+export default class WebView extends wepy.page {
+
+}
+    
+</script>
+
+<style lang="less">
+
+</style>

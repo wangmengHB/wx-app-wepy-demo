@@ -25,7 +25,8 @@ export default class extends wepy.app {
       'pages/home',
       'pages/calculator',
       'pages/canvas',
-      'pages/viewer'
+      'pages/viewer',
+      'pages/webview'
     ],
     window: {
       backgroundTextStyle: 'light',

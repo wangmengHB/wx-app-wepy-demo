@@ -86,7 +86,9 @@ export default class PanoramicViewer extends wepy.component {
         handleTouchStart (ev) {
             const {x, y} = ev.changedTouches[0]
             this.mouseX = x
-            this.mouseY = y 
+            this.mouseY = y
+            console.log(ev)
+             
         },
         
         handleTouchEnd (ev) {
@@ -112,7 +114,8 @@ export default class PanoramicViewer extends wepy.component {
                 this.repaint()
             }
             this.mouseX = x
-            this.mouseY = y                    
+            this.mouseY = y
+                                
         },
     }
 
